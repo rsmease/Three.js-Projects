@@ -1,1 +1,3 @@
-.learning-threejs-master
+learning-threejs-master/
+node_modules/
+bundle.js
