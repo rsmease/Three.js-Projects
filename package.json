@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "browserify": "^15.2.0",
+    "three": "^0.89.0",
+    "watchify": "^3.10.0"
+  }
+}
