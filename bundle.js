@@ -1,4 +1,251 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+var Stats = function () {
+
+	var startTime = Date.now(),
+		prevTime = startTime;
+	var ms = 0,
+		msMin = Infinity,
+		msMax = 0;
+	var fps = 0,
+		fpsMin = Infinity,
+		fpsMax = 0;
+	var frames = 0,
+		mode = 0;
+
+	var container = document.createElement('div');
+	container.id = 'stats';
+	container.addEventListener('mousedown', function (event) {
+		event.preventDefault();
+		setMode(++mode % 2)
+	}, false);
+	container.style.cssText = 'width:80px;opacity:0.9;cursor:pointer';
+
+	var fpsDiv = document.createElement('div');
+	fpsDiv.id = 'fps';
+	fpsDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#002';
+	container.appendChild(fpsDiv);
+
+	var fpsText = document.createElement('div');
+	fpsText.id = 'fpsText';
+	fpsText.style.cssText = 'color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
+	fpsText.innerHTML = 'FPS';
+	fpsDiv.appendChild(fpsText);
+
+	var fpsGraph = document.createElement('div');
+	fpsGraph.id = 'fpsGraph';
+	fpsGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#0ff';
+	fpsDiv.appendChild(fpsGraph);
+
+	while (fpsGraph.children.length < 74) {
+
+		var bar = document.createElement('span');
+		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#113';
+		fpsGraph.appendChild(bar);
+
+	}
+
+	var msDiv = document.createElement('div');
+	msDiv.id = 'ms';
+	msDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#020;display:none';
+	container.appendChild(msDiv);
+
+	var msText = document.createElement('div');
+	msText.id = 'msText';
+	msText.style.cssText = 'color:#0f0;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
+	msText.innerHTML = 'MS';
+	msDiv.appendChild(msText);
+
+	var msGraph = document.createElement('div');
+	msGraph.id = 'msGraph';
+	msGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#0f0';
+	msDiv.appendChild(msGraph);
+
+	while (msGraph.children.length < 74) {
+
+		var bar = document.createElement('span');
+		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#131';
+		msGraph.appendChild(bar);
+
+	}
+
+	var setMode = function (value) {
+
+		mode = value;
+
+		switch (mode) {
+
+			case 0:
+				fpsDiv.style.display = 'block';
+				msDiv.style.display = 'none';
+				break;
+			case 1:
+				fpsDiv.style.display = 'none';
+				msDiv.style.display = 'block';
+				break;
+		}
+
+	}
+
+	var updateGraph = function (dom, value) {
+
+		var child = dom.appendChild(dom.firstChild);
+		child.style.height = value + 'px';
+
+	}
+
+	return {
+
+		REVISION: 11,
+
+		domElement: container,
+
+		setMode: setMode,
+
+		begin: function () {
+
+			startTime = Date.now();
+
+		},
+
+		end: function () {
+
+			var time = Date.now();
+
+			ms = time - startTime;
+			msMin = Math.min(msMin, ms);
+			msMax = Math.max(msMax, ms);
+
+			msText.textContent = ms + ' MS (' + msMin + '-' + msMax + ')';
+			updateGraph(msGraph, Math.min(30, 30 - (ms / 200) * 30));
+
+			frames++;
+
+			if (time > prevTime + 1000) {
+
+				fps = Math.round((frames * 1000) / (time - prevTime));
+				fpsMin = Math.min(fpsMin, fps);
+				fpsMax = Math.max(fpsMax, fps);
+
+				fpsText.textContent = fps + ' FPS (' + fpsMin + '-' + fpsMax + ')';
+				updateGraph(fpsGraph, Math.min(30, 30 - (fps / 100) * 30));
+
+				prevTime = time;
+				frames = 0;
+
+			}
+
+			return time;
+
+		},
+
+		update: function () {
+
+			startTime = this.end();
+
+		}
+
+	}
+
+};
+
+module.exports.Stats = Stats;
+},{}],2:[function(require,module,exports){
+const THREE = require('three');
+const {
+    Stats
+} = require('./libs/stats');
+
+//scene
+const scene = new THREE.Scene();
+
+//camera
+const camera = new THREE.PerspectiveCamera(
+    45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+camera.position.x = -30;
+camera.position.y = 40;
+camera.position.z = 30;
+camera.lookAt(scene.position);
+
+//renderer
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(new THREE.Color("gray"));
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+//plane
+const planeGeometry = new THREE.PlaneGeometry(30, 30, 1, 1);
+const planeMaterial = new THREE.MeshLambertMaterial({
+    color: "green",
+    side: THREE.DoubleSide
+});
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.receiveShadow = true;
+
+plane.rotation.x = 1.4;
+
+scene.add(plane);
+
+//cube
+const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+const cubeMaterial = new THREE.MeshLambertMaterial({
+    color: "blue"
+});
+const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.castShadow = true;
+
+
+scene.add(cube);
+
+//spotlight
+const spotLight = new THREE.SpotLight("white");
+spotLight.position.set(-40, 60, -10);
+spotLight.castShadow = true;
+scene.add(spotLight);
+
+
+const initStats = function () {
+
+    const currentStats = Stats();
+
+    currentStats.setMode(0); // 0: fps, 1: ms
+
+    // Align top-left
+    currentStats.domElement.style.position = 'absolute';
+    currentStats.domElement.style.left = '0px';
+    currentStats.domElement.style.top = '0px';
+
+    document.getElementById("stats").appendChild(currentStats.domElement);
+
+    return currentStats;
+};
+
+//stats
+const displayStats = initStats();
+
+
+let step = 0;
+const animate = function () {
+    displayStats.update();
+
+
+    cube.rotation.y += 0.01;
+
+    step += 0.04;
+    cube.position.x = 2 + (10 * (Math.cos(step)));
+    cube.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+};
+
+animate();
+},{"./libs/stats":1,"three":3}],3:[function(require,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -45983,85 +46230,4 @@
 
 })));
 
-},{}],2:[function(require,module,exports){
-const THREE = require('three');
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-    45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(new THREE.Color(0xC0DE91));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
-
-//plane
-// const planeGeometry = new THREE.PlaneGeometry(60, 20);
-// const planeMaterial = new THREE.MeshLambertMaterial({
-//     color: 0x91AEDE
-// });
-// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-// plane.receiveShadow = true;
-// plane.position.x = 15;
-// plane.position.y = 0;
-// plane.position.z = 0;
-
-// scene.add(plane);
-
-// //cube
-const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-const cubeMaterial = new THREE.MeshLambertMaterial({
-    color: 0xA9901E,
-    emissive: 0xDED091
-});
-const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cube.castShadow = true;
-
-cube.position.x = -4;
-cube.position.y = 3;
-cube.position.z = 0;
-
-scene.add(cube);
-
-//sphere
-
-const sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-const sphereMaterial = new THREE.MeshLambertMaterial({
-    color: 0x7777ff
-});
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphere.castShadow = true;
-
-sphere.position.x = 20;
-sphere.position.y = 4;
-sphere.position.z = 2;
-
-scene.add(sphere);
-
-//position camera
-camera.position.x = -30;
-camera.position.y = 40;
-camera.position.z = 30;
-camera.lookAt(scene.position);
-
-const spotlight = new THREE.SpotLight(0xffffff);
-spotlight.position.set(-40, 60, -10);
-spotlight.castShadow = true;
-scene.add(spotlight);
-
-const animate = function () {
-    requestAnimationFrame(animate);
-
-    sphere.rotation.x += 0.05;
-    sphere.rotation.y += 0.05;
-
-    cube.rotation.x += 0.05;
-    cube.rotation.y += 0.05;
-    spotlight.position.x += 0.5;
-
-    renderer.render(scene, camera);
-};
-
-animate();
-},{"three":1}]},{},[2]);
+},{}]},{},[2]);
