@@ -117,12 +117,16 @@ let step = 0;
 const animate = function () {
     displayStats.update();
 
+    // rotate the cube around its axes
+    cube.rotation.x += controls.rotationSpeed;
+    cube.rotation.y += controls.rotationSpeed;
+    cube.rotation.z += controls.rotationSpeed;
 
-    // cube.rotation.y += 0.01;
+    // bounce the sphere up and down
+    step += controls.bouncingSpeed;
+    sphere.position.x = 20 + (10 * (Math.cos(step)));
+    sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
 
-    // step += 0.04;
-    // cube.position.x = 2 + (10 * (Math.cos(step)));
-    // cube.position.y = 2 + (10 * Math.abs(Math.sin(step)));
 
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
