@@ -93,6 +93,19 @@ scene.add(spotLight);
 
 var step = 0;
 
+var controls = new function () {
+    this.rotationSpeed = 0.02;
+    this.bouncingSpeed = 0.03;
+    this.lightY = 0.03;
+    this.lightX = 0.03;
+};
+
+var gui = new dat.GUI();
+gui.add(controls, 'rotationSpeed', 0, 0.5);
+gui.add(controls, 'bouncingSpeed', 0, 0.5);
+gui.add(controls, 'lightX', 0, 300);
+gui.add(controls, 'lightY', 0, 300);
+
 const initStats = function () {
 
     const currentStats = Stats();
@@ -116,11 +129,25 @@ const displayStats = initStats();
 const animate = function () {
     displayStats.update();
 
+    cube.rotation.x += controls.rotationSpeed;
+    cube.rotation.y += controls.rotationSpeed;
+    cube.rotation.z += controls.rotationSpeed;
+
+    // bounce the sphere up and down
+    step += controls.bouncingSpeed;
+    sphere.position.x = 20 + (10 * (Math.cos(step)));
+    sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+    //move light
+    spotLight.position.x = -40 + controls.lightX;
+    spotLight.position.y = 60 + controls.lightY;
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 };
 
 animate();
+
 
 function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
