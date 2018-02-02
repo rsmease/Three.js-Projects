@@ -8,9 +8,6 @@ const {
 
 //scene
 const scene = new THREE.Scene();
-// scene.fog = new THREE.Fog(0xffffff, 0.015, 100);
-// scene.fog = new THREE.FogExp2(0xffffff, 0.015);
-
 //camera
 const camera = new THREE.PerspectiveCamera(
     45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -42,7 +39,7 @@ plane.position.y = 0;
 plane.position.z = 0;
 
 // add the plane to the scene
-// scene.add(plane);
+scene.add(plane);
 
 // position and point the camera to the center of the scene
 camera.position.x = -30;
