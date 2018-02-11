@@ -4,5 +4,8 @@
     "lodash": "^4.17.4",
     "three": "^0.89.0",
     "watchify": "^3.10.0"
+  },
+  "scripts": {
+    "watchify": "watchify script.js -o bundle.js"
   }
 }
